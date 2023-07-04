@@ -38,29 +38,43 @@ def click_btn_3():
     button_3['text'] = 'クリックしました'
 
 def _redraw(_, x, y):
+    #ax1 = fig.add_subplot(111)
     """グラフを再描画するための関数"""
     # 現在のグラフを消去する
-    plt.cla()
+    #plt.cla()
+    ax1.cla()
     # 折れ線グラフを再描画する
     #plt.ylim(-1.2, 1.2)
-    plt.ylim(0, 100)
-    plt.title('2D VIEW (X-Y)')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.scatter(x, y)
+    #plt.ylim(0, 100)
+    ax1.set_ylim(0, 100)
+    #plt.title('2D VIEW (X-Y)')
+    ax1.set_title('2D VIEW (X-Y)')
+    #plt.xlabel('x')
+    ax1.set_xlabel('x')
+    #plt.ylabel('y')
+    ax1.set_ylabel('y')
+    #plt.scatter(x, y)
+    ax1.scatter(x, y)
     #plt.plot(x, y)
 
 def _redrawb(_, xb, yb):
+    #ax2 = figb.add_subplot(111)
     """グラフを再描画するための関数"""
     # 現在のグラフを消去する
-    plt.cla()
+    #plt.cla()
+    ax2.cla()
     # 折れ線グラフを再描画する
     #plt.ylim(-1.2, 1.2)
-    plt.ylim(0, 100)
-    plt.title('3D VIEW')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.scatter(xb, yb)
+    #plt.ylim(0, 100)
+    ax2.set_ylim(0, 100)
+    #plt.title('3D VIEW')
+    ax2.set_title('3D VIEW')
+    #plt.xlabel('x')
+    ax2.set_xlabel('x')
+    #plt.ylabel('y')
+    ax2.set_ylabel('y')
+    #plt.scatter(xb, yb)
+    ax2.scatter(xb, yb)
     #plt.plot(x, y)
 
 def _update():
@@ -110,16 +124,19 @@ def _initb():
 if __name__ == '__main__':
 
     # 描画領域
-    fig = plt.figure(figsize=(6,4), dpi=72)
+    fig  = plt.figure(figsize=(6,4), dpi=72)
     figb = plt.figure(figsize=(6,4), dpi=72)
 
+    ax1 = fig.add_subplot(111)
+    ax2 = figb.add_subplot(111)
+
     # 描画するデータ (最初は空)
-    x = [j for j in range(100)]
+    x  = [j for j in range(100)]
     xb = [j for j in range(100)]
     #x = [random.randint(0, 100) for _ in range(100)]
     #x = [0.0] *100
     #y = [0.0] *100
-    y = [random.randint(0, 100) for _ in range(100)]
+    y  = [random.randint(0, 100) for _ in range(100)]
     yb = [random.randint(0, 100) for _ in range(100)]
 
     params = {
@@ -144,7 +161,7 @@ if __name__ == '__main__':
     
     # ----------- ①Window作成 ----------- #
     root.title('AK5816')   # 画面タイトル設定
-    root.geometry('1050x700')       # 画面サイズ設定
+    root.geometry('1250x700')       # 画面サイズ設定
     #root.resizable(False, False)   # リサイズ不可に設定
 
     # ----------- ②Frameを定義 ----------- #
@@ -156,10 +173,10 @@ if __name__ == '__main__':
     #frame3 = Frame(root, width=400, height=200, borderwidth=0, relief='solid')
     labelframe_3 = LabelFrame(root, width=400, height=200, borderwidth=0, bd=4, text="All register read", font=('meiryo', 12))
     labelframe_4 = LabelFrame(root, width=400, height=200, borderwidth=0, bd=0, text="", font=('meiryo', 12))
-    frame5 = Frame(root, width=300, height=300, borderwidth=0, relief='solid')
-    frame6 = Frame(root, width=300, height=300, borderwidth=1, relief='solid')
-    frame7 = Frame(root, width=300, height=300, borderwidth=0, relief='solid')
-    frame8 = Frame(root, width=300, height=300, borderwidth=0, relief='solid')
+    frame5 = Frame(root, width=400, height=350, borderwidth=1, relief='solid')
+    frame6 = Frame(root, width=400, height=350, borderwidth=1, relief='solid')
+    frame7 = Frame(root, width=400, height=350, borderwidth=1, relief='solid')
+    frame8 = Frame(root, width=400, height=350, borderwidth=1, relief='solid')
 
     # Frameサイズを固定
     labelframe_1.grid_propagate(False)
@@ -285,25 +302,25 @@ if __name__ == '__main__':
     scrollbar.pack(side=RIGHT, fill=Y)
 
     # フレーム4
-    canvas_1a = Canvas(frame5,width=300,height=300)
+    canvas_1a = Canvas(frame5,width=400,height=350)
     canvas_1a.propagate(False)
-    canvas_1b = Canvas(frame6,width=300,height=300)
+    canvas_1b = Canvas(frame6,width=400,height=350)
     canvas_1b.propagate(False)
-    canvas_1c = Canvas(frame7,width=300,height=300)
-    canvas_1d = Canvas(frame8,width=300,height=300)
-    canvas_1a.create_rectangle(10, 10, 290, 290, fill = 'white')
-    #canvas_1a_x = FigureCanvasTkAgg(figb, master=canvas_1a)
+    canvas_1c = Canvas(frame7,width=400,height=300)
+    canvas_1d = Canvas(frame8,width=400,height=300)
+    #canvas_1a.create_rectangle(10, 10, 290, 290, fill = 'white')
+    canvas_1a_x = FigureCanvasTkAgg(figb, master=canvas_1a)
     #toolbar = NavigationToolbar2Tk(canvas_1a_x, canvas_1a)
-    #canvas_1a_x.draw()
-    #canvas_1a_x.get_tk_widget().pack()
+    canvas_1a_x.draw()
+    canvas_1a_x.get_tk_widget().pack()
     #label_1a_x = Label(canvas_1a, text='test', width=12)
     #label_1a_x.place(relx=0.02, rely=0.1, relheight=0.3, relwidth=0.95)
     #canvas_1b.create_rectangle(10, 10, 290, 290, fill = 'white')
     canvas_1b_x = FigureCanvasTkAgg(fig, master=canvas_1b)
     canvas_1b_x.draw()
     canvas_1b_x.get_tk_widget().pack()
-    canvas_1c.create_rectangle(10, 10, 290, 290)
-    canvas_1d.create_rectangle(10, 10, 290, 290)
+    #canvas_1c.create_rectangle(10, 10, 290, 290)
+    #canvas_1d.create_rectangle(10, 10, 290, 290)
     #canvas_1a.grid(row=0,column=0,padx=0,pady=0)
     canvas_1a.pack()
     canvas_1b.pack()

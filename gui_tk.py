@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import random
+from mpl_toolkits.mplot3d import Axes3D
 
 def click_btn_1a():
     button_1a['text'] = 'クリックしました'
@@ -57,7 +58,7 @@ def _redraw(_, x, y):
     ax1.scatter(x, y)
     #plt.plot(x, y)
 
-def _redrawb(_, xb, yb):
+def _redrawb(_, xb, yb, zb):
     #ax2 = figb.add_subplot(111)
     """グラフを再描画するための関数"""
     # 現在のグラフを消去する
@@ -65,16 +66,19 @@ def _redrawb(_, xb, yb):
     ax2.cla()
     # 折れ線グラフを再描画する
     #plt.ylim(-1.2, 1.2)
+    ax2.set_xlim(0, 100)
     #plt.ylim(0, 100)
     ax2.set_ylim(0, 100)
+    ax2.set_zlim(0, 10)
     #plt.title('3D VIEW')
     ax2.set_title('3D VIEW')
     #plt.xlabel('x')
     ax2.set_xlabel('x')
     #plt.ylabel('y')
     ax2.set_ylabel('y')
+    ax2.set_zlabel('z')
     #plt.scatter(xb, yb)
-    ax2.scatter(xb, yb)
+    ax2.scatter(xb, yb, zb)
     #plt.plot(x, y)
 
 def _update():
@@ -91,23 +95,45 @@ def _update():
         #y.append(math.sin(frame))
         y.append(frame)
         # データを追加する間隔 (100ms)
-        time.sleep(0.5)
+        time.sleep(0.2)
 
 def _updateb():
     """データを一定間隔で追加するスレッドの処理"""
     ib = 100
+    lista = [random.randint(0, 100) for _ in range(100)]
     listb = [random.randint(0, 100) for _ in range(100)]
+    listc = [random.randint(0, 10)  for _ in range(100)]
     #for frame in itertools.count(0, 0.1):
-    for frameb in itertools.cycle(listb):    
-        xb.pop(0)
-        xb.append(ib)
-        ib += 1
+    #for framea, frameb, framec in itertools.cycle(lista, listb, listc):    
+    #    xb.pop(0)
+    #    #xb.append(ib)
+    #    #ib += 1
+    #    yb.append(framea)
 
-        yb.pop(0)
-        #y.append(math.sin(frame))
-        yb.append(frameb)
-        # データを追加する間隔 (100ms)
-        time.sleep(0.5)
+    #    yb.pop(0)
+    #    #y.append(math.sin(frame))
+    #    yb.append(frameb)
+
+    #    zb.pop(0)
+    #    zb.append(framec)
+
+    #    # データを追加する間隔 (100ms)
+    #    time.sleep(0.5)
+
+    for framea in itertools.cycle(lista):
+        xb.pop(0)
+        xb.append(framea)
+
+        for frameb in itertools.cycle(listb):
+            yb.pop(0)
+            yb.append(frameb)
+
+            for framec in itertools.cycle(listc):
+                zb.pop(0)
+                zb.append(framec)
+
+                # データを追加する間隔 (100ms)
+                time.sleep(0.2)
 
 def _init():
     """データを一定間隔で追加するためのスレッドを起動する"""
@@ -128,23 +154,27 @@ if __name__ == '__main__':
     figb = plt.figure(figsize=(6,4), dpi=72)
 
     ax1 = fig.add_subplot(111)
-    ax2 = figb.add_subplot(111)
+    ax2 = figb.add_subplot(111, projection='3d')
 
     # 描画するデータ (最初は空)
     x  = [j for j in range(100)]
-    xb = [j for j in range(100)]
-    #x = [random.randint(0, 100) for _ in range(100)]
+    #xb = [0.0] *100
+    xb = [random.randint(0, 100) for _ in range(100)]
     #x = [0.0] *100
     #y = [0.0] *100
     y  = [random.randint(0, 100) for _ in range(100)]
+    #yb = [0.0] *100
     yb = [random.randint(0, 100) for _ in range(100)]
+
+    #zb = [0.0] *100
+    zb = [random.randint(0, 10) for _ in range(100)]
 
     params = {
         'fig': fig,
         'func': _redraw,  # グラフを更新する関数
         'init_func': _init,  # グラフ初期化用の関数 (今回はデータ更新用スレッドの起動)
         'fargs': (x, y),  # 関数の引数 (フレーム番号を除く)
-        'interval': 500,  # グラフを更新する間隔 (ミリ秒)
+        'interval': 200,  # グラフを更新する間隔 (ミリ秒)
     }
     anime = animation.FuncAnimation(**params)
 
@@ -152,8 +182,8 @@ if __name__ == '__main__':
         'fig': figb,
         'func': _redrawb,  # グラフを更新する関数
         'init_func': _initb,  # グラフ初期化用の関数 (今回はデータ更新用スレッドの起動)
-        'fargs': (xb, yb),  # 関数の引数 (フレーム番号を除く)
-        'interval': 500,  # グラフを更新する間隔 (ミリ秒)
+        'fargs': (xb, yb, zb),  # 関数の引数 (フレーム番号を除く)
+        'interval': 200,  # グラフを更新する間隔 (ミリ秒)
     }
     animeb = animation.FuncAnimation(**paramsb)
 

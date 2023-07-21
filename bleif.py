@@ -9,6 +9,8 @@ import sys
 import os
 import asyncio
 from integ_method import Integ_Method
+from tkinter import filedialog
+from gen_graph import GEN_GRAPH
 
 input_mode = 0 #0:GUI control #1:CUI control #2:File/CUI
 cur_dir = os.path.dirname(__file__)
@@ -30,11 +32,13 @@ class Window(tk.Tk):
 	global event
 	global readdata
 	global p_readdata
+	global lines
 	i = 0
 	j = 0
 	event = 0
 	readdata = 0
 	p_readdata = [0] * 128
+	lines = []
 
 	def __init__(self, loop):
 
@@ -76,7 +80,8 @@ class Window(tk.Tk):
 		button_connect = tk.Button(labelframe_1, text=" Connect  ", width=10, command=lambda: self.loop.create_task(self.connect_ble()))
 		button_discon  = tk.Button(labelframe_1, text="Disconnect", width=10, command=lambda: asyncio.create_task(self.discongui()))
 		button_start   = tk.Button(labelframe_1, text=" Startup  ", width=10, command=lambda: asyncio.create_task(self.sugui()))
-		button_radargo = tk.Button(labelframe_1, text=" Radar go ", width=10, command=lambda: click_btn_radargo())
+		button_radargo = tk.Button(labelframe_1, text=" Radar go ", width=10, command=lambda: asyncio.create_task(self.rggui()))
+		button_setfile = tk.Button(labelframe_1, text=" SET File ", width=10, command=lambda: asyncio.create_task(self.sfgui()))
 		button_pdnl    = tk.Button(labelframe_1, text="  PDN L   ", width=10, command=lambda: asyncio.create_task(self.pdngui(0)))
 		button_pdnh    = tk.Button(labelframe_1, text="  PDN H   ", width=10, command=lambda: asyncio.create_task(self.pdngui(1)))
 		button_rstnl   = tk.Button(labelframe_1, text="  RSTN L  ", width=10, command=lambda: asyncio.create_task(self.rstngui(0)))
@@ -88,6 +93,7 @@ class Window(tk.Tk):
 		button_discon.grid(row=0, column=1, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
 		button_start.grid(row=1, column=0, sticky=tk.W,  padx=5, pady=8, ipadx=5, ipady=5)
 		button_radargo.grid(row=1, column=1, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
+		button_setfile.grid(row=1, column=2, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
 		button_pdnl.grid(row=2, column=0, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
 		button_pdnh.grid(row=3, column=0, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
 		button_rstnl.grid(row=2, column=1, sticky=tk.W, padx=5, pady=8, ipadx=5, ipady=5)
@@ -255,6 +261,7 @@ class Window(tk.Tk):
 		tree.insert(parent='', index=126, iid=126, values=("0" , "0x00", "00"))
 		tree.insert(parent='', index=127, iid=127, values=("0" , "0x00", "00"))
 		button_allread = ttk.Button(labelframe_3, text='READ PAGE', command=lambda: [asyncio.create_task(self.p_rdgui(txt_rpage.get())), p_readback(p_readdata)])
+		#label_rpage    = tk.Label(labelframe_3, text='Page', width=10)
 		txt_rpage      = tk.Entry(labelframe_3, justify=tk.RIGHT, width=10)
 		#txt_rpage.insert(0,"0")
 		style = ttk.Style()
@@ -263,10 +270,11 @@ class Window(tk.Tk):
 		scrollbar = ttk.Scrollbar(labelframe_3, orient=tk.VERTICAL, command=tree.yview)
 		tree.configure(yscroll=scrollbar.set)
 		button_allread.pack(side=tk.LEFT, padx=5, pady=5)
-		button_allread.grid(row=0, column=0, padx=5, pady=5, ipadx=5, ipady=5, sticky=tk.W)
-		txt_rpage.grid(row=0, column=1, padx=5, pady=5, ipadx=5, ipady=5, sticky=tk.W)
-		tree.grid(row=1, column=0, columnspan=2, padx=(5, 0), pady=10, sticky=tk.W)
-		scrollbar.grid(row=1, column=2, padx=0, pady=10, sticky=tk.NS)
+		button_allread.grid(row=0, column=0, padx=(5, 0), pady=5, ipadx=5, ipady=5, sticky=tk.W)
+		#label_rpage.grid(row=0, column=1, padx=5, pady=5, ipadx=5, ipady=5, sticky=tk.W)
+		txt_rpage.grid(row=0, column=1, padx=(0, 5), pady=5, ipadx=2, ipady=2, sticky=tk.W)
+		tree.grid(row=1, column=0, columnspan=3, padx=(5, 0), pady=10, sticky=tk.W)
+		scrollbar.grid(row=1, column=3, padx=0, pady=10, sticky=tk.NS)
 
 		def readback(readdata):
 			global i
@@ -281,8 +289,44 @@ class Window(tk.Tk):
 				i -= 1
 
 		def click_btn_radargo():
-			button_radargo['text'] = 'クリックしました'
+			#button_radargo['text'] = 'クリックしました'
+			cmd = "radar_go"
+			add_cmd = cmd.encode()
+			lines.append(add_cmd)
+			print(lines)
 
+		def click_btn_setfile():
+			#button_setfile['text'] = 'クリックしました'
+			initial_dir = os.getcwd()
+			file_path = filedialog.askopenfilename(initialdir=initial_dir)
+			#file_path = filedialog.askopenfilename()
+			#lines = []
+			try:
+				with open(file_path, 'r', encoding='utf-8') as f:
+					for line in f:
+						#if line.startswith('#'):
+						#	continue
+						if "#" in line[0]:
+							pass
+						else:
+							lines.append(line)
+					#text = f.read()
+			except UnicodeDecodeError:
+				with open(file_path, 'r', encoding='shift_jis') as f:
+					for line in f:
+						#if line.startswith('#'):
+						#	continue
+						if "#" in line[0]:
+							pass
+						else:
+							lines.append(line)
+					#text = f.read()
+
+			for i in range(len(lines)):
+				lines[i] = lines[i].encode()
+			print(lines)
+			#return lines
+		
 		def p_readback(p_readdata):
 			global j
 			if (j == 0):#Readボタンが押されたら
@@ -608,6 +652,46 @@ class Window(tk.Tk):
 		d = "startup"
 		event = 1 # command event
 
+	# Radar go
+	async def rggui(self):
+		global lines, event
+		cmd = "radar_go"
+		add_cmd = cmd.encode()
+		lines.append(add_cmd)
+		#print(lines)
+		event = 4 # command event
+		#return lines
+
+	# Set file
+	async def sfgui(self):
+		global lines, event
+		initial_dir = os.getcwd()
+		file_path = filedialog.askopenfilename(initialdir=initial_dir)
+		try:
+			with open(file_path, 'r', encoding='utf-8') as f:
+				for line in f:
+					if "#" in line[0]:
+						pass
+					else:
+						#line.encode()
+						lines.append(line.strip())
+		except UnicodeDecodeError:
+			with open(file_path, 'r', encoding='shift_jis') as f:
+				for line in f:
+					if "#" in line[0]:
+						pass
+					else:
+						#line.encode()
+						lines.append(line.strip())
+
+			#for i in range(len(lines)):
+			#	lines[i] = lines[i].encode('utf-8')
+		
+		lines = [line.encode() for line in lines]
+		print(lines)
+		event = 0 # command event
+		return lines
+
 	async def command(self):
 		global event
 		data = d.encode
@@ -627,6 +711,11 @@ class Window(tk.Tk):
 		data = d.encode
 		event = 0 # Go to idle state
 		return data
+
+	async def command_radargo(self):
+		#global lines
+		global event
+		event = 0 # Go to idle state
 
 	async def connect_ble(self):
 		async with Integ_Method() as uart:
@@ -650,16 +739,20 @@ class Window(tk.Tk):
 			
 			global readdata
 			global p_readdata
+			global lines
 #MAIN
 			if input_mode == 0 :# GUI control
 				while True:
 					if(event == 0):# idle state
 						data = await loop.run_in_executor(None, await self.idle())
+						print(event)
 						await uart._exe_cmd(data)
+						print(data)
 					elif(event == 1):# Write command event
 						data = await loop.run_in_executor(None, await self.command())
 						await uart._exe_cmd(data)
 					elif(event == 2):# Read back command event
+						print(data)
 						data = await loop.run_in_executor(None, await self.command_read())
 						readdata = await uart._exe_cmd(data)
 						print(readdata)
@@ -667,6 +760,18 @@ class Window(tk.Tk):
 						data = await loop.run_in_executor(None, await self.command_p_read())
 						p_readdata = await uart._exe_cmd(data)
 						print(p_readdata)
+					elif(event == 4):# 
+						print(event)
+						print(lines)
+						for cmd in lines:
+							print(cmd) 
+							#cmdset = await loop.run_in_executor(None, await self.command_radargo(), cmd)
+							await uart._exe_cmd(cmd)
+							print(cmd)
+							#event = 0
+						#data = await loop.run_in_executor(None, await self.idle())
+						#event = 0
+						await loop.run_in_executor(None, await self.command_radargo())
 					elif(event == 99):# disconnect
 						break
 

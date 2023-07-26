@@ -11,6 +11,7 @@ import asyncio
 from integ_method import Integ_Method
 from tkinter import filedialog
 from gen_graph import GEN_GRAPH
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 input_mode = 0 #0:GUI control #1:CUI control #2:File/CUI
 cur_dir = os.path.dirname(__file__)
@@ -593,6 +594,16 @@ class Window(tk.Tk):
 				p_readdata = [0] * 128
 				j -= 1
 
+		canvas_a = tk.Canvas(frame5,width=400,height=350)
+		canvas_a.propagate(False)
+		gen_graph_instance = GEN_GRAPH()
+		[fig, ax] = gen_graph_instance._init_graph()
+		#canvas_a.create_rectangle(2, 2, 400, 350, fill = 'white')
+		canvas_a_x = FigureCanvasTkAgg(fig, master=canvas_a)
+		canvas_a_x.draw()
+		canvas_a_x.get_tk_widget().pack()
+		canvas_a.pack()
+
 	async def show(self):
 		while True:
 			self.root.update()
@@ -688,7 +699,7 @@ class Window(tk.Tk):
 			#	lines[i] = lines[i].encode('utf-8')
 		
 		lines = [line.encode() for line in lines]
-		print(lines)
+		#print(lines)
 		event = 0 # command event
 		return lines
 
@@ -745,29 +756,29 @@ class Window(tk.Tk):
 				while True:
 					if(event == 0):# idle state
 						data = await loop.run_in_executor(None, await self.idle())
-						print(event)
+						#print(event)
 						await uart._exe_cmd(data)
-						print(data)
+						#print(data)
 					elif(event == 1):# Write command event
 						data = await loop.run_in_executor(None, await self.command())
 						await uart._exe_cmd(data)
 					elif(event == 2):# Read back command event
-						print(data)
+						#print(data)
 						data = await loop.run_in_executor(None, await self.command_read())
 						readdata = await uart._exe_cmd(data)
-						print(readdata)
+						#print(readdata)
 					elif(event == 3):# Page Read back command event
 						data = await loop.run_in_executor(None, await self.command_p_read())
 						p_readdata = await uart._exe_cmd(data)
-						print(p_readdata)
+						#print(p_readdata)
 					elif(event == 4):# 
-						print(event)
-						print(lines)
+						#print(event)
+						#print(lines)
 						for cmd in lines:
-							print(cmd) 
+							#print(cmd) 
 							#cmdset = await loop.run_in_executor(None, await self.command_radargo(), cmd)
 							await uart._exe_cmd(cmd)
-							print(cmd)
+							#print(cmd)
 							#event = 0
 						#data = await loop.run_in_executor(None, await self.idle())
 						#event = 0
